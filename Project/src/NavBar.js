@@ -20,7 +20,7 @@ const NavBar = () => {
 
     return(
         <div className='navbar'>
-            <h1 className='title'>Eli</h1>
+            <h1 className='title'>ELI_</h1>
             <div className='links'>
                 <Button onClick={onClickImage}>Image To Text</Button>
                 <Button onClick={onClickVid}>Video To Text</Button>

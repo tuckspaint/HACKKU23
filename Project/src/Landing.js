@@ -12,7 +12,7 @@ export default function Landing() {
             .then(data => console.log(data));
     };
 
-    const [query, setQuery] = React.useState("Differential equations");
+    const [query, setQuery] = React.useState("Differential Equations");
     const [level, setLevel] = React.useState(0);
     return (
     <div>
