@@ -6,7 +6,10 @@ export default function Landing() {
 
     const search = (e) => {
         e.preventDefault();
-        console.log(query);
+        console.log()
+        fetch('http://localhost:3000/chat?q=' + query)
+            .then(response => response.text())
+            .then(data => console.log(data));
     };
 
     const [query, setQuery] = React.useState("Differential equations");
