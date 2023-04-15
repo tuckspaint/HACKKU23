@@ -70,11 +70,87 @@ app.listen(PORT, () => {
 // ChatGPT REST endpoint
 app.get('/chat', (req, res) => {
   const query = req.query.q;
+  const level = req.query.l;
   console.log(query)
+  console.log(level);
 
   // Inject query text into formatted question
-  let content = "Explain " + query + " as if I was five years old in two sentences.";
+  let content = "Explain " + query + " as if I was " + level + " in two sentences.";
   console.log(content)
+
+//MongoDB START
+const { error } = require('console');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://DevinBarger:kwChw0RJeEZ3C4Bp@cluster0.rme8xjc.mongodb.net/ELI?retryWrites=true&w=majority";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+const entriesTable = client.db("ELI").collection("Entries");
+let currentInput;
+let currentOutput;
+let knowledgeLevel;
+
+async function searchForInput() {
+    try {
+      currentInput = query;
+      // Connect the client to the server	(optional starting in v4.7)
+      await client.connect();
+      await entriesTable.find(
+          {input: currentInput}, {knowledgeLevel: level}, {$exists: true}).toArray()
+          .then((search) => {
+            if(search.length > 0) { //if exists
+                currentOutput = search[0].output
+                GPT35Turbo(GPT35TurboMessage).then(answer => {
+                  res.send(currentOutput);
+                  console.log(answer); //DEVELOPER
+                });
+            } else { // if it does not 
+                addNewInput().catch(console.dir);
+                GPT35Turbo(GPT35TurboMessage).then(answer => {
+                  currentOutput = answer;
+                  res.send(answer);
+                  console.log(answer); //DEVELOPER
+                });
+            }
+        });
+    } finally {
+      // Ensures that the client will close when you finish/error
+      await client.close();
+    }
+}
+
+async function addNewInput() {
+    await entriesTable.insertOne(
+        {
+            input: currentInput, //put user input here
+            output: currentOutput, //put ai output here
+            likes: 0
+        }
+    );
+}
+
+async function vote() {
+    try {
+        await client.connect();
+        //if(upvote){
+        await entriesTable.updateOne({input: currentInput}, {$set: {likes: likes + 1}});
+        //if(downvote){
+        await entriesTable.updateOne({input: currentInput}, {$set: {likes: likes - 1}});
+        if(currentInput.likes < 0) entriesTable.deleteOne(currentInput);
+    } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+    }
+}
+//MongoDB END
+
 
   const GPT35TurboMessage = [
     { role: "system",
@@ -94,6 +170,7 @@ app.get('/chat', (req, res) => {
 
   GPT35Turbo(GPT35TurboMessage).then(answer => {
     res.send(answer);
+    //res.send();
     console.log(answer);
   });
 })
