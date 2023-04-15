@@ -1,41 +1,40 @@
-const GetGPT = () => {
-  const { Configuration, OpenAIApi } = require("openai");
+const { Configuration, OpenAIApi } = require("openai");
 
-  const http = require('http');
+const http = require('http');
 
-  const hostname = '127.0.0.1';
-  const port = 3000;
+const hostname = '127.0.0.1';
+const port = 3000;
 
-  const server = http.createServer((req, res) => {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Hello World');
-    });
-
-  server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
+const server = http.createServer((req, res) => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('Hello World');
   });
 
-  const configuration = new Configuration({
-      apiKey: "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",
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+const configuration = new Configuration({
+    apiKey: "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",
+});
+
+const openai = new OpenAIApi(configuration);
+
+const GPT35TurboMessage = [
+  { role: "system",
+    content: "Explain Computer Science like im 5 in 2 sentences.",
+  },
+];
+
+let GPT35Turbo = async (message) => {
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: message,
+    max_tokens: 75
   });
 
-  const openai = new OpenAIApi(configuration);
+  return response.data.choices[0].message.content;
+};
 
-  async function openaiTest() {
-      const response = await openai.createCompletion({
-          model: "gpt-3.5-turbo",
-          prompt: "Explain lizards like im a five year old\n",
-          temperature: 0.7,
-          max_tokens: 100,
-          top_p: 1,
-          frequency_penalty: 0,
-          presence_penalty: 0,
-        })
-      console.log(response.data.choices)
-  }
-
-  openaiTest()
-}
-
-export default GetGPT
+(async () => { console.log(await GPT35Turbo(GPT35TurboMessage)) })();
