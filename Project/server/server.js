@@ -2,6 +2,29 @@ const { Configuration, OpenAIApi } = require("openai");
 const express = require('express')
 const bparse = require('body-parser');
 const cors = require('cors');
+const vision = require('@google-cloud/vision');
+const {Storage} = require('@google-cloud/storage');
+
+// Creates a client
+const client = new vision.ImageAnnotatorClient({
+  keyFilename: "key.json"
+});
+
+
+async function ImageToText() {
+/**
+ * TODO(developer): Uncomment the following line before running the sample.
+ */
+// const fileName = 'Local image file, e.g. /path/to/image.png';
+const fileName = 'text.jpg';
+// Performs text detection on the local file
+const [result] = await client.textDetection(fileName);
+const detections = result.textAnnotations;
+console.log('Text:');
+detections.forEach(text => console.log(text));
+}
+
+//ImageToText()
 
 // Express application
 const app = express()
