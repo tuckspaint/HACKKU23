@@ -13,7 +13,7 @@ app.use(bparse.json());
 
 // OpenAI Configuration
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
@@ -51,5 +51,4 @@ app.get('/chat', (req, res) => {
     res.send(answer);
     console.log(answer);
   });
-
 })
