@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons'
-import './styles/ImageTotext.css'
+//import './styles/ImageToText.css'
 
 export default function ImageToText() {
     const onDrop = useCallback(acceptedFiles => {

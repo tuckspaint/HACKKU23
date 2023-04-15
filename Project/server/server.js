@@ -107,7 +107,7 @@ async function imageToText() {
   detections.forEach(text => console.log(text));
 }
 
-imageToText()
+//imageToText()
 
 // Express application
 const app = express()
