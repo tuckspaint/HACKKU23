@@ -1,4 +1,6 @@
-const GetGPT = () => {
+import React from 'react'
+
+const GetGPT = (query) => {
   const { Configuration, OpenAIApi } = require("openai");
 
   const http = require('http');
@@ -25,7 +27,7 @@ const GetGPT = () => {
   async function openaiTest() {
       const response = await openai.createCompletion({
           model: "gpt-3.5-turbo",
-          prompt: "Explain lizards like im a five year old\n",
+          prompt: query + "\n",
           temperature: 0.7,
           max_tokens: 100,
           top_p: 1,

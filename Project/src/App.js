@@ -4,6 +4,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import NavBar from './NavBar'
 import ImageToText from './ImageToText'
 import VidToText from './VidToText'
+import Landing from './Landing'
 
 const App = () => {
 
@@ -11,7 +12,7 @@ const App = () => {
       <div>
       <NavBar/>
       <Routes>
-        <Route exact path = "/"/>
+        <Route exact path = "/" element = {<Landing/>}/>
         <Route exact path = "/ImageToText" element = {<ImageToText/>}/>
         <Route exact path = "/VidToText" element = {<VidToText/>}/>
       </Routes>
