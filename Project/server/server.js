@@ -16,7 +16,7 @@ server.listen(port, hostname, () => {
 });
 
 const configuration = new Configuration({
-    apiKey: "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",
+    apiKey: process.env.OPENAI_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
