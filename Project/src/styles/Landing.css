@@ -18,6 +18,8 @@ body {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 1em;
+    margin-top: 50px;
+    margin-bottom: 50px;
   }
   
   button {
@@ -83,4 +85,18 @@ body {
   
   .item .meta > *:not(:last-child) {
     margin-right: 2em;
+  }
+
+  .belowButtons{
+    justify-content: center;
+    margin-top: 100px;
+    margin-left: 10px;
+  }
+
+  .buttonDiv{
+    text-align: center;
+  }
+
+  .headers{
+    text-align: center;
   }
