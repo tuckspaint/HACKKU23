@@ -6,28 +6,7 @@ import './styles/ImageTotext.css'
 
 export default function ImageToText() {
     const onDrop = useCallback(acceptedFiles => {
-        console.log(acceptedFiles)
-        /*return(
-            <>
-            <li
-                className="file-item"
-                key={file.name}>
-                <FontAwesomeIcon icon={faFileAlt} />
-                <p>{file.name}</p>
-                <div className="actions">
-                    <div className="loading"></div>
-                    {file.isUploading && <FontAwesomeIcon
-                        icon={faSpinner} className="fa-spin"
-                        onClick={() => deleteFile(file.name)} />
-                    }
-                    {!file.isUploading &&
-                        <FontAwesomeIcon icon={faTrash}
-                            onClick={() => deleteFile(file.name)} />
-                    }
-                </div>
-            </li>
-        </>
-        )*/
+        console.log(acceptedFiles); //might want to make this only accept image files
     }, []);
 
     const {
