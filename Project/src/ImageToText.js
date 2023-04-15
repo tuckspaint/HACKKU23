@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 
 export default function ImageToText() {
     const onDrop = useCallback(acceptedFiles => {
-        console.log(acceptedFiles);
+        console.log(acceptedFiles); //might want to make this only accept image files
     }, []);
 
     const {
