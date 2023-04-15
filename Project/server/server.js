@@ -3,7 +3,7 @@ const express = require('express')
 const bparse = require('body-parser');
 const cors = require('cors');
 const vision = require('@google-cloud/vision');
-const {Storage} = require('@google-cloud/storage');
+const { Storage } = require('@google-cloud/storage');
 const videoIntelligence = require('@google-cloud/video-intelligence');
 
 // The ID of your GCS bucket
@@ -28,7 +28,7 @@ async function uploadFile() {
     // object that does not yet exist, set the ifGenerationMatch precondition to 0
     // If the destination object already exists in your bucket, set instead a
     // generation-match precondition using its generation number.
-    preconditionOpts: {ifGenerationMatch: generationMatchPrecondition},
+    preconditionOpts: { ifGenerationMatch: generationMatchPrecondition },
   };
 
   await storage.bucket(bucketName).upload(filePath, options);
@@ -98,16 +98,16 @@ const client = new vision.ImageAnnotatorClient({
 });
 
 
-async function ImageToText() {
-const fileName = 'text.jpg';
-// Performs text detection on the local file
-const [result] = await client.textDetection(fileName);
-const detections = result.textAnnotations;
-console.log('Text:');
-detections.forEach(text => console.log(text));
+async function imageToText() {
+  const fileName = 'text.jpg';
+  // Performs text detection on the local file
+  const [result] = await client.textDetection(fileName);
+  const detections = result.textAnnotations;
+  console.log('Text:');
+  detections.forEach(text => console.log(text));
 }
 
-//ImageToText()
+//imageToText()
 
 // Express application
 const app = express()
@@ -140,26 +140,26 @@ app.get('/chat', (req, res) => {
   let content = "Explain " + query + " as if I was " + levelArray[level] + " in two sentences.";
   console.log(content)
 
-//MongoDB START
-const { error } = require('console');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://DevinBarger:kwChw0RJeEZ3C4Bp@cluster0.rme8xjc.mongodb.net/ELI?retryWrites=true&w=majority";
+  //MongoDB START
+  const { error } = require('console');
+  const { MongoClient, ServerApiVersion } = require('mongodb');
+  const uri = "mongodb+srv://DevinBarger:kwChw0RJeEZ3C4Bp@cluster0.rme8xjc.mongodb.net/ELI?retryWrites=true&w=majority";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+  // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+  const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
 
-const entriesTable = client.db("ELI").collection("Entries");
-let currentInput;
-let currentOutput;
-let knowledgeLevel;
+  const entriesTable = client.db("ELI").collection("Entries");
+  let currentInput;
+  let currentOutput;
+  let knowledgeLevel;
 
-async function searchForInput() {
+  async function searchForInput() {
     try {
       currentInput = query;
       // Connect the client to the server	(optional starting in v4.7)
@@ -192,7 +192,7 @@ async function searchForInput() {
     } finally {
       // Ensures that the client will close when you finish/error
     }
-}
+  }
 
 async function addNewInput() {
   console.log("in function");
@@ -204,29 +204,30 @@ async function addNewInput() {
             likes: 0
         }
     );
-}
+  }
 
-async function vote() {
+  async function vote() {
     try {
-        await client.connect();
-        //if(upvote){
-        await entriesTable.updateOne({input: currentInput}, {$set: {likes: likes + 1}});
-        //if(downvote){
-        await entriesTable.updateOne({input: currentInput}, {$set: {likes: likes - 1}});
-        if(currentInput.likes < 0) entriesTable.deleteOne(currentInput);
+      await client.connect();
+      //if(upvote){
+      await entriesTable.updateOne({ input: currentInput }, { $set: { likes: likes + 1 } });
+      //if(downvote){
+      await entriesTable.updateOne({ input: currentInput }, { $set: { likes: likes - 1 } });
+      if (currentInput.likes < 0) entriesTable.deleteOne(currentInput);
     } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
+      // Ensures that the client will close when you finish/error
+      await client.close();
     }
-}
-//MongoDB END
+  }
+  //MongoDB END
 
   const GPT35TurboMessage = [
-    { role: "system",
-      content: content, 
+    {
+      role: "system",
+      content: content,
     },
   ];
-  
+
   let GPT35Turbo = async (message) => {
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",

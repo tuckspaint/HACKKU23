@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileAlt, faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons'
+//import './styles/ImageToText.css'
 
 export default function ImageToText() {
     const onDrop = useCallback(acceptedFiles => {
@@ -16,6 +18,7 @@ export default function ImageToText() {
 
     return (
     <div {...getRootProps()}>
+        <p className='title'>Upload file</p>
         <input {...getInputProps()} />
         <button className='dropButton'>Drop your images here!</button>
     </div>
