@@ -132,11 +132,12 @@ app.listen(PORT, () => {
 app.get('/chat', (req, res) => {
   const query = req.query.q;
   const level = req.query.l;
+  const levelArray = ["5 years old", "in high school", "in college", "an expert"];
   console.log(query)
   console.log(level);
 
   // Inject query text into formatted question
-  let content = "Explain " + query + " as if I was " + level + " in two sentences.";
+  let content = "Explain " + query + " as if I was " + levelArray[level] + " in two sentences.";
   console.log(content)
 
 //MongoDB START
@@ -162,36 +163,44 @@ async function searchForInput() {
     try {
       currentInput = query;
       // Connect the client to the server	(optional starting in v4.7)
-      await client.connect();
-      await entriesTable.find(
-          {input: currentInput}, {knowledgeLevel: level}, {$exists: true}).toArray()
+      await client.connect().then(async () => {
+        await entriesTable.find({
+          $and: [
+            {input: currentInput}, 
+            {knowledgeLevel: level}]}).toArray()
           .then((search) => {
             if(search.length > 0) { //if exists
                 currentOutput = search[0].output
-                GPT35Turbo(GPT35TurboMessage).then(answer => {
-                  res.send(currentOutput);
-                  console.log(answer); //DEVELOPER
-                });
+                res.send(currentOutput);
+                console.log(currentOutput); //DEVELOPER
             } else { // if it does not 
-                addNewInput().catch(console.dir);
-                GPT35Turbo(GPT35TurboMessage).then(answer => {
-                  currentOutput = answer;
-                  res.send(answer);
-                  console.log(answer); //DEVELOPER
-                });
+              console.log("does not exist");
+                  GPT35Turbo(GPT35TurboMessage).then((answer) => {
+                    currentOutput = answer;
+                    res.send(answer);
+                    console.log(answer); //DEVELOPER
+                  }).then(async () => {
+                    addNewInput().then(async () => {
+                      await client.close();
+                      console.log("closed");
+                    }).catch(console.dir);
+                  });
             }
-        });
+        })
+      });
+
     } finally {
       // Ensures that the client will close when you finish/error
-      await client.close();
     }
 }
 
 async function addNewInput() {
+  console.log("in function");
     await entriesTable.insertOne(
         {
-            input: currentInput, //put user input here
-            output: currentOutput, //put ai output here
+            input: currentInput,
+            output: currentOutput,
+            knowledgeLevel: level,
             likes: 0
         }
     );
@@ -212,7 +221,6 @@ async function vote() {
 }
 //MongoDB END
 
-
   const GPT35TurboMessage = [
     { role: "system",
       content: content, 
@@ -229,9 +237,5 @@ async function vote() {
     return response.data.choices[0].message.content;
   };
 
-  GPT35Turbo(GPT35TurboMessage).then(answer => {
-    res.send(answer);
-    //res.send();
-    console.log(answer);
-  });
+  searchForInput();
 })
