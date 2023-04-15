@@ -23,10 +23,10 @@ export default function Landing() {
         </form>
         <h1 className='headers'>like I'm...</h1>
         <div className='buttonDiv'>
-            <button className='belowButtons'>5 years old</button>
-            <button className='belowButtons'>In high school</button>
-            <button className='belowButtons'>In college</button>
-            <button className='belowButtons'>An expert</button>
+            <button onClick = {query && search} className='belowButtons'>5 years old</button>
+            <button onClick = {query && search} className='belowButtons'>In high school</button>
+            <button onClick = {query && search} className='belowButtons'>In college</button>
+            <button onClick = {query && search} className='belowButtons'>An expert</button>
         </div>
     </div>
     )
