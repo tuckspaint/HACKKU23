@@ -5,28 +5,6 @@ const cors = require('cors');
 const vision = require('@google-cloud/vision');
 const {Storage} = require('@google-cloud/storage');
 
-
-
-// async function authenticateImplicitWithAdc() {
-
-//   // This snippet demonstrates how to list buckets.
-//   // NOTE: Replace the client created below with the client required for your application.
-//   // Note that the credentials are not specified when constructing the client.
-//   // The client library finds your credentials using ADC.
-//   const storage = new Storage({
-//     auth: (process.env.GCP_API_KEY),
-//   });
-//   const [buckets] = await storage.getBuckets();
-//   console.log('Buckets:');
-
-//   for (const bucket of buckets) {
-//     console.log(`- ${bucket.name}`);
-//   }
-
-//   console.log('Listed all storage buckets.');
-// }
-
-// authenticateImplicitWithAdc();
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
   keyFilename: "key.json"
@@ -46,7 +24,7 @@ console.log('Text:');
 detections.forEach(text => console.log(text));
 }
 
-ImageToText()
+//ImageToText()
 
 // Express application
 const app = express()
