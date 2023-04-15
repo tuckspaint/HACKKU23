@@ -16,22 +16,25 @@ server.listen(port, hostname, () => {
 });
 
 const configuration = new Configuration({
-    apiKey: "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",
+    apiKey: process.env.OPENAI_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
 
-async function openaiTest() {
-    const response = await openai.createCompletion({
-        model: "gpt-3.5-turbo",
-        prompt: "Explain lizards like im a five year old\n",
-        temperature: 0.7,
-        max_tokens: 100,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-      })
-    console.log(response.data.choices)
-}
+const GPT35TurboMessage = [
+  { role: "system",
+    content: "Explain Computer Science like im 5 in 2 sentences.",
+  },
+];
 
-openaiTest()
+let GPT35Turbo = async (message) => {
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: message,
+    max_tokens: 75
+  });
+
+  return response.data.choices[0].message.content;
+};
+
+(async () => { console.log(await GPT35Turbo(GPT35TurboMessage)) })();
