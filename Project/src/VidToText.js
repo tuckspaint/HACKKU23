@@ -9,22 +9,28 @@ import { blue } from '@mui/material/colors';
 
 export default function ImageToText() {
 
-    const [ImgQuery, setImgQuery] = React.useState("Differential equations");
-    const [imgLevel, setimgLevel] = React.useState(0);
-    const [imgResp, setimgResp] = React.useState("")
+    const [imgPath, setImgPath] = React.useState("Differential equations");
+    const [imgLevel, setImgLevel] = React.useState(0);
+    const [imgResp, setImgResp] = React.useState("")
     const [isPending, setIsPending] = React.useState(false)
 
-    const returnExp = (level) => {
-        setIsPending(false)
-        setimgLevel(level)
-        console.log(level)
-        fetch('http://localhost:3000/chat?q=' + ImgQuery + "&l=" + level)
-            .then(response => response.text())
-            .then(response => {
-              setimgResp(response)
-              setIsPending(false)
-            })
-    };
+    function returnExp(level) {
+      setImgLevel(level)
+      setIsPending(false)
+
+      const d = new FormData();
+      d.append('file', imgPath.target.files[0])
+      console.log(d)
+
+      fetch('http://localhost:3000/video?l=' + imgLevel, {
+        method: "POST",  
+        body: d
+      }).then(res => res.text())
+        .then(res => {
+          setImgResp(res)
+          setIsPending(false)
+        })     
+    }
 
     return (
         <div style={{
@@ -37,22 +43,12 @@ export default function ImageToText() {
             </div>
             <input
               type="file"
-              accept="image/*"
               style={{ display: 'none' }}
               id="contained-button-file"
             />
-            <label htmlFor="contained-button-file">
-              <Button variant="contained" component="span">
-                Upload
-              </Button>
-            </label>
-            <input accept="image/*" id="icon-button-file"
-              type="file" style={{ display: 'none' }} />
-            <label htmlFor="icon-button-file">
-              <IconButton aria-label="upload picture"
-              component="span">
-              </IconButton>
-            </label>
+
+            <input id="icon-button-file" type="file" onChange={(e) => setImgPath(e)} />
+
             <div className='buttonDiv'>
                 <button className='belowButtons' onClick={() => {returnExp(0)}}>5 years old</button>
                 <button className='belowButtons' onClick={() => {returnExp(1)}}>In high school</button>
