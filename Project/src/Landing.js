@@ -28,17 +28,9 @@ export default function Landing() {
         fetch('http://localhost:3000/like?q=' + query + "&l=" + level + "&v=" + likes)
             .then(response => console.log(response.text()))
 
-    function likeFunc(likes) {
-        console.log(likes)
-        fetch('http://localhost:3000/like?q=' + query + "&l=" + level + "&v=" + likes)
-            .then(response => console.log(response.text()))
-
         setResp("")
     }
 
-    const [query, setQuery] = React.useState("");
-    const [level, setLevel] = React.useState(0);
-    const [resp, setResp] = React.useState("");
     return (
     <div>
         <h1 className='headers'>Explain</h1>
@@ -69,5 +61,4 @@ export default function Landing() {
         </div>
     </div>
     )
-}
 }
