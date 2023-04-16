@@ -1,23 +1,48 @@
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
+import Button from '@material-ui/core/Button';
+//import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import IconButton from '@material-ui/core/IconButton';
+// import './styles/ImageTotext.css'
 
 export default function VidToText() {
-  const onDrop = useCallback(acceptedFiles => {
-    console.log(acceptedFiles); //might want to make this only accept video files (e.g. mp4)
-  }, []);
 
-  const {
-    getRootProps,
-    getInputProps
-  } = useDropzone({
-    onDrop
-  });
+    const [imgPath, setImgPath] = React.useState();
+    const [imgLevel, setImgLevel] = React.useState(0);
+    const [imgResp, setImgResp] = React.useState("")
 
-  return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      <button className='dropButton'>Drop your video here!</button>
-    </div>
-  )
+    function postVideo(level) {
+      setImgLevel(level)
+
+      const d = new FormData();
+      d.append('file', imgPath.target.files[0])
+      console.log(d)
+
+      fetch('http://localhost:3000/video?l=' + imgLevel, {
+        method: "POST",  
+        body: d
+      }).then(res => res.text())
+        .then(res => {setImgResp(res)})     
+    }
+
+    return (
+        <div style={{
+            display: 'flex',
+            margin: 'auto',
+            width: 400,
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ width: '100%', float: 'left' }}></div>
+            <input id="icon-button-file" type="file" name="file" onChange={(e) => setImgPath(e)}/>
+            <div className='buttonDiv'>
+                <button className='belowButtons' onClick={() => {postVideo(0)}}>5 years old</button>
+                <button className='belowButtons' onClick={() => {postVideo(1)}}>In high school</button>
+                <button className='belowButtons' onClick={() => {postVideo(2)}}>In college</button>
+                <button className='belowButtons' onClick={() => {postVideo(3)}}>An expert</button>
+            </div>
+            <div className='output'>
+                {imgResp}
+            </div>
+          </div>
+
+    )
 }
