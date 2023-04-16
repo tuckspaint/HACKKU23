@@ -14,19 +14,17 @@ export default function Landing() {
             .then(response => setResp(response))
     };
 
-    const likeFunc = () => {
-        setResp("")
-        //call to the backend to add like/dislike
-    }
+    function likeFunc(likes) {
+        console.log(likes)
+        fetch('http://localhost:3000/like?q=' + query + "&l=" + level + "&v=" + likes)
+            .then(response => console.log(response.text()))
 
-    const dislikeFunc = () => {
         setResp("")
-        //call to the backend to add like/dislike
     }
 
     const [query, setQuery] = React.useState("");
     const [level, setLevel] = React.useState(0);
-    const [resp, setResp] = React.useState("")
+    const [resp, setResp] = React.useState("");
     return (
     <div>
         <h1 className='headers'>Explain</h1>
@@ -39,8 +37,8 @@ export default function Landing() {
                 />
                 {resp&&<div className='like-dislike'>
                     <p>Did you like this answer?</p>
-                    <button onClick={likeFunc}>Yes</button>
-                    <button onClick={dislikeFunc}>No</button>
+                    <button onClick={() => likeFunc(1)}>Yes</button>
+                    <button onClick={() => likeFunc(-1)}>No</button>
                 </div>}
             </form>
         </div>
