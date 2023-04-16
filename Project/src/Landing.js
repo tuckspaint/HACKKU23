@@ -17,7 +17,10 @@ export default function Landing() {
         console.log(level)
         fetch('http://localhost:3000/chat?q=' + query + "&l=" + level)
             .then(response => response.text())
-            .then(response => setResp(response))
+            .then(response => {
+                setResp(response)
+                setIsPending(false)
+            })
     };
 
     function likeFunc(likes) {
