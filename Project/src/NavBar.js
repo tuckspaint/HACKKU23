@@ -11,7 +11,7 @@ const NavBar = () => {
     }
 
     function onClickVid(){
-        history('/VidTotext')
+        history('/VidToText')
     }
 
     function onClickText(){

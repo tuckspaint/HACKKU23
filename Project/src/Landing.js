@@ -6,17 +6,33 @@ import { blue } from '@mui/material/colors';
 
 export default function Landing() {
 
+    const [query, setQuery] = React.useState("");
+    const [level, setLevel] = React.useState(0);
+    const [resp, setResp] = React.useState("")
+    const [isPending, setIsPending] = React.useState(false)
+
     const search = (level) => {
+        setIsPending(true)
         setLevel(level)
         console.log(level)
         fetch('http://localhost:3000/chat?q=' + query + "&l=" + level)
             .then(response => response.text())
-            .then(response => setResp(response))
-    };
+            .then(response => {
+                setResp(response)
+                setIsPending(false)
+            })
+    }
 
-    const [query, setQuery] = React.useState("Differential Equations");
-    const [level, setLevel] = React.useState(0);
-    const [resp, setResp] = React.useState("")
+    const likeFunc = () => {
+        setResp("")
+        //call to the backend to add like/dislike
+    }
+
+    const dislikeFunc = () => {
+        setResp("")
+        //call to the backend to add like/dislike
+    }
+
     return (
     <div>
         <h1 className='headers'>Explain</h1>
@@ -27,6 +43,11 @@ export default function Landing() {
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                 />
+                {resp&&<div className='like-dislike'>
+                    <p>Did you like this answer?</p>
+                    <button onClick={likeFunc}>Yes</button>
+                    <button onClick={dislikeFunc}>No</button>
+                </div>}
             </form>
         </div>
         <h1 className='headers'>like I'm...</h1>
@@ -37,6 +58,7 @@ export default function Landing() {
             <button className='belowButtons' onClick={() => {search(3)}}>An expert</button>
         </div>
         <div className='output'>
+            {isPending && <ClipLoader color={blue} loading={isPending} size={50}/>}
             {resp}
         </div>
     </div>
