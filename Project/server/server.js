@@ -124,9 +124,34 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
+//MongoDB
+const { error } = require('console');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://DevinBarger:kwChw0RJeEZ3C4Bp@cluster0.rme8xjc.mongodb.net/ELI?retryWrites=true&w=majority";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const dbclient = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+let currentInput;
+let currentOutput;
+let knowledgeLevel;
+let votes;
+let currentRecord;
+
+const entriesTable = dbclient.db("ELI").collection("Entries");
+//MongoDB
+
 app.listen(PORT, () => {
   console.log(`Eli listening on port ${PORT}. He hears you when you're sleeping... Shhhhhhh`)
 })
+
+
 
 // ChatGPT REST endpoint
 app.get('/chat', (req, res) => {
@@ -141,48 +166,32 @@ app.get('/chat', (req, res) => {
   console.log(content)
 
   //MongoDB START
-  const { error } = require('console');
-  const { MongoClient, ServerApiVersion } = require('mongodb');
-  const uri = "mongodb+srv://DevinBarger:kwChw0RJeEZ3C4Bp@cluster0.rme8xjc.mongodb.net/ELI?retryWrites=true&w=majority";
-
-  // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-  const client = new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    }
-  });
-
-  const entriesTable = client.db("ELI").collection("Entries");
-  let currentInput;
-  let currentOutput;
-  let knowledgeLevel;
 
   async function searchForInput() {
     try {
-      currentInput = query;
+      currentInput = query.toLowerCase();
       // Connect the client to the server	(optional starting in v4.7)
-      await client.connect().then(async () => {
+      await dbclient.connect().then(async () => {
         await entriesTable.find({
           $and: [
             {input: currentInput}, 
             {knowledgeLevel: level}]}).toArray()
           .then((search) => {
             if(search.length > 0) { //if exists
-                currentOutput = search[0].output
+              currentRecord = search[0];
+              votes = search[0].likes;  
+              currentOutput = search[0].output
                 res.send(currentOutput);
-                console.log(currentOutput); //DEVELOPER
+                votes = parseInt(search[0].likes);
             } else { // if it does not 
-              console.log("does not exist");
                   GPT35Turbo(GPT35TurboMessage).then((answer) => {
+                    currentRecord = 
                     currentOutput = answer;
                     res.send(answer);
-                    console.log(answer); //DEVELOPER
                   }).then(async () => {
                     addNewInput().then(async () => {
-                      await client.close();
-                      console.log("closed");
+                      votes = 0;
+                      await dbclient.close();
                     }).catch(console.dir);
                   });
             }
@@ -195,7 +204,6 @@ app.get('/chat', (req, res) => {
   }
 
 async function addNewInput() {
-  console.log("in function");
     await entriesTable.insertOne(
         {
             input: currentInput,
@@ -206,19 +214,7 @@ async function addNewInput() {
     );
   }
 
-  async function vote() {
-    try {
-      await client.connect();
-      //if(upvote){
-      await entriesTable.updateOne({ input: currentInput }, { $set: { likes: likes + 1 } });
-      //if(downvote){
-      await entriesTable.updateOne({ input: currentInput }, { $set: { likes: likes - 1 } });
-      if (currentInput.likes < 0) entriesTable.deleteOne(currentInput);
-    } finally {
-      // Ensures that the client will close when you finish/error
-      await client.close();
-    }
-  }
+  
   //MongoDB END
 
   const GPT35TurboMessage = [
@@ -240,3 +236,39 @@ async function addNewInput() {
 
   searchForInput();
 })
+
+app.get("/like", (req, res) => {
+  const level = req.query.l;
+  const query = req.query.q;
+  currentInput = query;
+  const vote = req.query.v;
+
+  async function setLike() {
+    try {
+      await dbclient.connect()
+      .then(async () => {
+        votes = (parseInt(votes) + parseInt(vote));
+        await entriesTable.updateOne(
+          {
+            $and: [
+              {input: currentInput}, 
+              {knowledgeLevel: level}]}, { $set: { likes: votes } }
+              ) })
+      .then(async () => {
+        console.log("votes: " + votes)
+        if (votes <= 0) {
+          await entriesTable.deleteOne({
+            $and: [
+              {input: currentInput}, 
+              {knowledgeLevel: level}]})}
+        }).then(async () => {
+          await dbclient.close()
+          res.send("Success")
+        });
+          // Ensures that the client will close when you finish/error
+      } finally {}
+    }
+
+  setLike();
+});
+
