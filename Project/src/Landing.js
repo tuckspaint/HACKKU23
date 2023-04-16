@@ -14,7 +14,17 @@ export default function Landing() {
             .then(response => setResp(response))
     };
 
-    const [query, setQuery] = React.useState("Differential Equations");
+    const likeFunc = () => {
+        setResp("")
+        //call to the backend to add like/dislike
+    }
+
+    const dislikeFunc = () => {
+        setResp("")
+        //call to the backend to add like/dislike
+    }
+
+    const [query, setQuery] = React.useState("");
     const [level, setLevel] = React.useState(0);
     const [resp, setResp] = React.useState("")
     return (
@@ -27,6 +37,11 @@ export default function Landing() {
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                 />
+                {resp&&<div className='like-dislike'>
+                    <p>Did you like this answer?</p>
+                    <button onClick={likeFunc}>Yes</button>
+                    <button onClick={dislikeFunc}>No</button>
+                </div>}
             </form>
         </div>
         <h1 className='headers'>like I'm...</h1>

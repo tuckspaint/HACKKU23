@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 //import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
-import './styles/ImageTotext.css'
+//import './styles/ImageTotext.css'
 
 export default function ImageToText() {
 
