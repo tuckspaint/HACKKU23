@@ -5,107 +5,14 @@ const cors = require('cors');
 const vision = require('@google-cloud/vision');
 const { Storage } = require('@google-cloud/storage');
 const videoIntelligence = require('@google-cloud/video-intelligence');
-
-// The ID of your GCS bucket
-const bucketName = 'vid_buck';
-
-// The path to your file to upload
-// const filePath = 'path/to/your/file';
-
-// The new ID for your GCS file
-const destFileName = 'video';
-
-// Creates a client
-const storage = new Storage();
-
-async function uploadFile() {
-  const options = {
-    destination: destFileName,
-    // Optional:
-    // Set a generation-match precondition to avoid potential race conditions
-    // and data corruptions. The request to upload is aborted if the object's
-    // generation number does not match your precondition. For a destination
-    // object that does not yet exist, set the ifGenerationMatch precondition to 0
-    // If the destination object already exists in your bucket, set instead a
-    // generation-match precondition using its generation number.
-    preconditionOpts: { ifGenerationMatch: generationMatchPrecondition },
-  };
-
-  await storage.bucket(bucketName).upload(filePath, options);
-  console.log(`${filePath} uploaded to ${bucketName}`);
-}
-
-//uploadFile().catch(console.error);
-
-// Creates a client
-const videoClient = new videoIntelligence.VideoIntelligenceServiceClient({
-  keyFilename: "key.json",
-});
-
-const gcsUri = 'gs://vid_buck/Anti-Gravity Wheel_.mp4';
-
-async function analyzeVideoTranscript() {
-  const videoContext = {
-    speechTranscriptionConfig: {
-      languageCode: 'en-US',
-      enableAutomaticPunctuation: true,
-    },
-  };
-
-  const request = {
-    inputUri: gcsUri,
-    features: ['SPEECH_TRANSCRIPTION'],
-    videoContext: videoContext,
-  };
-
-  const [operation] = await videoClient.annotateVideo(request);
-  console.log('Waiting for operation to complete...');
-  const [operationResult] = await operation.promise();
-  // There is only one annotation_result since only
-  // one video is processed.
-  const annotationResults = operationResult.annotationResults[0];
-
-  for (const speechTranscription of annotationResults.speechTranscriptions) {
-    // The number of alternatives for each transcription is limited by
-    // SpeechTranscriptionConfig.max_alternatives.
-    // Each alternative is a different possible transcription
-    // and has its own confidence score.
-    for (const alternative of speechTranscription.alternatives) {
-      console.log('Alternative level information:');
-      console.log(`Transcript: ${alternative.transcript}`);
-      console.log(`Confidence: ${alternative.confidence}`);
-
-      console.log('Word level information:');
-      for (const wordInfo of alternative.words) {
-        const word = wordInfo.word;
-        const start_time =
-          wordInfo.startTime.seconds + wordInfo.startTime.nanos * 1e-9;
-        const end_time =
-          wordInfo.endTime.seconds + wordInfo.endTime.nanos * 1e-9;
-        console.log('\t' + start_time + 's - ' + end_time + 's: ' + word);
-      }
-    }
-  }
-}
-
-//analyzeVideoTranscript();
-
-
+const multer = require('multer');
+const { parse } = require("path");
 
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
   keyFilename: "key.json"
 });
 
-
-async function imageToText() {
-  const fileName = 'text.jpg';
-  // Performs text detection on the local file
-  const [result] = await client.textDetection(fileName);
-  const detections = result.textAnnotations;
-  console.log('Text:');
-  detections.forEach(text => console.log(text));
-}
 
 //imageToText()
 
@@ -114,8 +21,8 @@ const app = express()
 const PORT = 3000;
 
 app.use(cors())
-app.use(bparse.urlencoded({ extended: false }));
-app.use(bparse.json());
+app.use(bparse.urlencoded({ extended: false, limit: '50mb' }));
+app.use(bparse.json({limit: '50mb'}));
 
 // OpenAI Configuration
 const configuration = new Configuration({
@@ -152,14 +59,152 @@ app.listen(PORT, () => {
 })
 
 
+const store = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'tmp/')
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname)
+  },
+})
+
+const upload = multer({ storage: store })
+
+app.use(cors())
+
+let GPT35Turbo = async (str) => {
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        role: "system",
+        content: str,
+      },
+    ],
+    max_tokens: 75
+  });
+
+  return response.data.choices[0].message.content;
+};
+
+app.post('/video', upload.single('file'), (req, res) => {
+  const path = req.file.path;
+  const level = req.query.l;
+  const levelArray = ["5 years old", "in high school", "in college", "an expert"];
+  const bucketName = 'vid_buck';
+  // The new ID for your GCS file
+  const destFileID = "video.mp4";
+  
+  console.log(path)
+
+  // Inject query text into formatted question
+  var query = "";
+  // Performs text detection on the local file
+  // The ID of your GCS bucket
+  // The path to your file to upload
+
+  // Creates a client
+  const storage = new Storage({
+    keyFilename: "key.json",
+  });
+
+  async function uploadFile() {
+    const options = {
+      destination: destFileID,
+    };
+
+    await storage.bucket(bucketName).upload(path, options).then(() => {
+      console.log(`${path} uploaded to ${bucketName}`);
+    })
+  }
+
+  // Creates a client
+  const videoClient = new videoIntelligence.VideoIntelligenceServiceClient({
+    keyFilename: "key.json",
+  });
+
+  const gcsUri = 'gs://vid_buck/video.mp4';
+  async function analyzeVideoTranscript() {
+    const videoContext = {
+      speechTranscriptionConfig: {
+        languageCode: 'en-US',
+        enableAutomaticPunctuation: true,
+      },
+    };
+
+    const request = {
+      inputUri: gcsUri,
+      features: ['SPEECH_TRANSCRIPTION'],
+      videoContext: videoContext,
+    };
+
+    const [operation] = await videoClient.annotateVideo(request);
+    console.log('Waiting for operation to complete...');
+
+    const [operationResult] = await operation.promise();
+    // There is only one annotation_result since only
+    // one video is processed.
+    const annotationResults = operationResult.annotationResults[0];
+
+    for (const speechTranscription of annotationResults.speechTranscriptions) {
+      // The number of alternatives for each transcription is limited by
+      // SpeechTranscriptionConfig.max_alternatives.
+      // Each alternative is a different possible transcription
+      // and has its own confidence score.
+      for (const alternative of speechTranscription.alternatives) {
+        query += alternative.transcript + ' ';
+      }
+    } 
+  }
+  
+  uploadFile().then(() => {
+    analyzeVideoTranscript().then(() => {
+      let content = "Explain " + query + " as if I was " + levelArray[level] + " in two sentences.";
+      console.log(content);
+      GPT35Turbo(content).then(a => {
+        res.send(a)
+        console.log(a)
+      })
+    })
+  }); 
+});
+
+// Image text recognition REST endpoint
+app.post('/image', upload.single('file'), (req, res) => {
+  console.log(req.file.path);
+  const fileName = req.file.path;
+  const level = req.query.l;
+  const levelArray = ["5 years old", "in high school", "in college", "an expert"];
+  // console.log(query)
+  // console.log(level);
+
+  // Inject query text into formatted question
+  var query = "";
+
+  (async () => {
+    // Performs text detection on the local file
+    const [result] = await client.textDetection(fileName);
+    const detections = result.textAnnotations;
+    detections.forEach(text => {
+      query += text.description + ' ';
+    });
+  })().then(() => {
+    let content = "Explain " + query + " as if I was " + levelArray[level] + " in two sentences.";
+    console.log(content);
+    GPT35Turbo(content).then(a => {
+      res.send(a)
+      console.log(a)
+    })
+  })
+});
 
 // ChatGPT REST endpoint
 app.get('/chat', (req, res) => {
   const query = req.query.q;
   const level = req.query.l;
   const levelArray = ["5 years old", "in high school", "in college", "an expert"];
-  console.log(query)
-  console.log(level);
+  // console.log(query)
+  // console.log(level);
 
   // Inject query text into formatted question
   let content = "Explain " + query + " as if I was " + levelArray[level] + " in two sentences.";
@@ -184,8 +229,8 @@ app.get('/chat', (req, res) => {
                 res.send(currentOutput);
                 votes = parseInt(search[0].likes);
             } else { // if it does not 
-                  GPT35Turbo(GPT35TurboMessage).then((answer) => {
-                    currentRecord = 
+              console.log("does not exist");
+                  GPT35Turbo(content).then((answer) => {
                     currentOutput = answer;
                     res.send(answer);
                   }).then(async () => {
@@ -216,23 +261,6 @@ async function addNewInput() {
 
   
   //MongoDB END
-
-  const GPT35TurboMessage = [
-    {
-      role: "system",
-      content: content,
-    },
-  ];
-
-  let GPT35Turbo = async (message) => {
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: message,
-      max_tokens: 75
-    });
-
-    return response.data.choices[0].message.content;
-  };
 
   searchForInput();
 })
