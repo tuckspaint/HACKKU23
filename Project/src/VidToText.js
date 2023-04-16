@@ -2,18 +2,28 @@ import React, { useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 //import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
+//import './styles/ImageTotext.css'
+import ClipLoader from "react-spinners/ClipLoader"
 
-export default function VidToText() {
-  const [ImgQuery, setImgQuery] = React.useState("Differential equations");
+import { blue } from '@mui/material/colors';
+
+export default function ImageToText() {
+
+    const [ImgQuery, setImgQuery] = React.useState("Differential equations");
     const [imgLevel, setimgLevel] = React.useState(0);
     const [imgResp, setimgResp] = React.useState("")
+    const [isPending, setIsPending] = React.useState(false)
 
     const returnExp = (level) => {
+        setIsPending(false)
         setimgLevel(level)
         console.log(level)
         fetch('http://localhost:3000/chat?q=' + ImgQuery + "&l=" + level)
             .then(response => response.text())
-            .then(response => setimgResp(response))
+            .then(response => {
+              setimgResp(response)
+              setIsPending(false)
+            })
     };
 
     return (
@@ -50,6 +60,7 @@ export default function VidToText() {
                 <button className='belowButtons' onClick={() => {returnExp(3)}}>An expert</button>
             </div>
             <div className='output'>
+                {isPending && <ClipLoader color={blue} loading={isPending} size={50}/>}
                 {imgResp}
             </div>
           </div>

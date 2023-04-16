@@ -6,13 +6,22 @@ import { blue } from '@mui/material/colors';
 
 export default function Landing() {
 
+    const [query, setQuery] = React.useState("");
+    const [level, setLevel] = React.useState(0);
+    const [resp, setResp] = React.useState("")
+    const [isPending, setIsPending] = React.useState(false)
+
     const search = (level) => {
+        setIsPending(true)
         setLevel(level)
         console.log(level)
         fetch('http://localhost:3000/chat?q=' + query + "&l=" + level)
             .then(response => response.text())
-            .then(response => setResp(response))
-    };
+            .then(response => {
+                setResp(response)
+                setIsPending(false)
+            })
+    }
 
     const likeFunc = () => {
         setResp("")
@@ -24,9 +33,6 @@ export default function Landing() {
         //call to the backend to add like/dislike
     }
 
-    const [query, setQuery] = React.useState("");
-    const [level, setLevel] = React.useState(0);
-    const [resp, setResp] = React.useState("")
     return (
     <div>
         <h1 className='headers'>Explain</h1>
@@ -52,6 +58,7 @@ export default function Landing() {
             <button className='belowButtons' onClick={() => {search(3)}}>An expert</button>
         </div>
         <div className='output'>
+            {isPending && <ClipLoader color={blue} loading={isPending} size={50}/>}
             {resp}
         </div>
     </div>

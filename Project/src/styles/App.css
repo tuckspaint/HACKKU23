@@ -47,3 +47,10 @@ input {
 input:focus {
   outline: auto #17f;
 }
+
+.output{
+  text-align: center;
+  margin-bottom: 40px;
+  margin-top: 20px;
+  font-size: larger;
+}
