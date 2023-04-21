@@ -10,7 +10,10 @@ The responses can also be liked or disliked so that inaccurate responses can be 
 ![ELIdatabase](https://user-images.githubusercontent.com/94943097/233204726-8e5b037e-e1ab-4e5e-b6a5-4491ad23079d.png)
 
 ELI_'s responses are generated using OpenAI API to generate output, and Google Cloud Vision, Storage, and Video Intelligence APIs are used to 
-generate transcripts of images and videos.
+generate transcripts of images and videos. Below is ELI_'s response to an image of a phonology textbook and YouTuber Veritasium's video "[Anti-Gravity Wheel?](https://www.youtube.com/watch?v=GeyDf4ooPdo)":
+
+![image2](https://user-images.githubusercontent.com/94943097/233733859-06b346b0-b052-4213-95e0-9aba6f0041c4.png)
+![image](https://user-images.githubusercontent.com/94943097/233733865-cf76d8f0-7f6d-4382-b6d6-a2c263cb3d67.png)
 
 This project was submitted for HackKU23. The theme this year was "Accessibility," with the primary focus being on the accessibility of software and information.
 We felt that being able to explain concepts in different comprehension levels would allow users to more easily access any information they wanted more clarity on,
